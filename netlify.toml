@@ -1,0 +1,20 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[context.production]
+  command = "npm run build"
+  
+[context.develop]
+  command = "npm run dev"
+
+# Redirect rules for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment variables (update with your actual keys)
+[build.environment]
+  VITE_RAZORPAY_KEY = "rzp_test_SDbLXflWneqvCJ"
+  NODE_VERSION = "18"
