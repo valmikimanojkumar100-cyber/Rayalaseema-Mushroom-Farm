@@ -41,9 +41,33 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
     setIsProcessing(true);
 
+    // Get Razorpay key from environment variables
+    const getRazorpayKey = (): string => {
+      // Try Vite's import.meta.env
+      const viteKey = (import.meta.env as any).VITE_RAZORPAY_KEY;
+      if (viteKey && viteKey !== '') {
+        return viteKey;
+      }
+      
+      // Try Netlify's window.__NETLIFY_ENV__
+      const netlifyEnv = (window as any).__NETLIFY_ENV__;
+      if (netlifyEnv && netlifyEnv.VITE_RAZORPAY_KEY && netlifyEnv.VITE_RAZORPAY_KEY !== '') {
+        return netlifyEnv.VITE_RAZORPAY_KEY;
+      }
+      
+      // Try process.env
+      const processKey = (process.env as any).VITE_RAZORPAY_KEY;
+      if (processKey && processKey !== '') {
+        return processKey;
+      }
+      
+      // Default test key
+      return 'rzp_test_SDbLXflWneqvCJ';
+    };
+
     // Initialize Razorpay Payment
     const options = {
-      key: 'rzp_test_SDbLXflWneqvCJ', // Test key
+      key: getRazorpayKey(),
       amount: totalAmount * 100, // Amount in paise
       currency: 'INR',
       name: 'Rayalaseema Mushroom Farm',

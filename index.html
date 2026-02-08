@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Satisfy&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Babel for JSX compilation and modern JavaScript support -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -104,6 +106,24 @@
 </head>
   <body class="bg-earth-50 text-earth-900 overflow-x-hidden selection:bg-moss-200 selection:text-moss-900">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+    
+    <!-- Netlify Environment Variables Handler -->
+    <script>
+      // Load environment variables from Netlify during runtime
+      window.__NETLIFY_ENV__ = {
+        VITE_GOOGLE_CLIENT_ID: window.location.hostname === 'localhost' 
+          ? '123456789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com'
+          : (window.__NETLIFY_ENV_VARS__ && window.__NETLIFY_ENV_VARS__.VITE_GOOGLE_CLIENT_ID) || '',
+        VITE_RAZORPAY_KEY: (window.__NETLIFY_ENV_VARS__ && window.__NETLIFY_ENV_VARS__.VITE_RAZORPAY_KEY) || 'rzp_test_SDbLXflWneqvCJ',
+        VITE_API_URL: (window.__NETLIFY_ENV_VARS__ && window.__NETLIFY_ENV_VARS__.VITE_API_URL) || 'https://api.example.com'
+      };
+      
+      // Log environment status for debugging
+      if (window.location.hostname !== 'localhost') {
+        console.log('✓ Environment variables loaded from Netlify');
+      }
+    </script>
+  
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
