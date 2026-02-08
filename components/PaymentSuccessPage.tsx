@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, ShoppingBag, Home, Star, Send } from 'lucide-react';
 import { EASE_ORGANIC } from '../constants';
 
+import { getVerifiedPayment } from '../utils/paymentVerification';
 const BODY_CLASS = 'payment-success-view';
 
 interface PaymentSuccessPageProps {
@@ -21,6 +22,20 @@ export const PaymentSuccessPage: React.FC<PaymentSuccessPageProps> = ({
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
 
+  // Verify payment before showing success page
+  const [paymentVerified, setPaymentVerified] = useState(false);
+
+  useEffect(() => {
+    const verifiedPayment = getVerifiedPayment();
+    if (!verifiedPayment) {
+      console.warn('❌ Unauthorized access: No verified payment found');
+      alert('❌ Payment not verified. This page is only accessible after a successful payment.');
+      onBackToHome();
+      return;
+    }
+    setPaymentVerified(true);
+    console.log('✓ Payment verified. Displaying success page.');
+  }, [onBackToHome]);
   useEffect(() => {
     document.body.classList.add(BODY_CLASS);
     return () => document.body.classList.remove(BODY_CLASS);
@@ -47,6 +62,15 @@ export const PaymentSuccessPage: React.FC<PaymentSuccessPageProps> = ({
       setFeedback('');
     }, 500);
   };
+
+  // Don't render if payment is not verified
+  if (!paymentVerified) {
+    return (
+      <div className="fixed inset-0 z-[2147483647] flex items-center justify-center p-6 bg-earth-50">
+        <p className="text-earth-600">Verifying payment...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[2147483647] flex items-center justify-center p-6 bg-earth-50 overflow-y-auto">
@@ -88,6 +112,29 @@ export const PaymentSuccessPage: React.FC<PaymentSuccessPageProps> = ({
             Your payment has been verified and confirmed. We're preparing your fresh mushrooms for delivery.
           </p>
 
+          {/* Payment Verification Details */}
+          {(() => {
+            const payment = getVerifiedPayment();
+            return payment ? (
+              <div className="bg-moss-50 rounded-2xl p-4 mb-6 text-left border border-moss-200">
+                <p className="text-xs font-semibold text-moss-700 mb-3 uppercase tracking-wider">✓ Payment Verified</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-earth-600">Payment ID:</span>
+                    <code className="text-moss-700 font-mono text-xs bg-white px-2 py-1 rounded">{payment.razorpayPaymentId.slice(0, 15)}...</code>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-earth-600">Amount:</span>
+                    <span className="font-semibold text-moss-700">₹{payment.amount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-earth-600">Status:</span>
+                    <span className="text-moss-700 font-medium">✓ Successful</span>
+                  </div>
+                </div>
+              </div>
+            ) : null;
+          })()}
           {/* Order Details */}
           <div className="bg-gradient-to-br from-moss-50 to-earth-50 rounded-2xl p-6 mb-8 text-left border border-moss-100">
             <p className="font-semibold text-earth-900 mb-4 text-center">What Happens Next?</p>

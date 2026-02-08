@@ -76,7 +76,7 @@ export const isNetlifyProduction = (): boolean => {
  * Log environment status for debugging
  */
 export const logEnvironmentStatus = (): void => {
-  const isDev = import.meta.env.DEV;
+  const isDev = (import.meta.env as any).DEV;
   if (isDev) {
     const env = getEnvironmentVariables();
     console.group('🔧 Environment Variables');
