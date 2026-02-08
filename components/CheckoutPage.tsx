@@ -85,12 +85,23 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
       });
 
       const json = await resp.json();
+      console.log('Verification response:', json);
+      
       if (!resp.ok || !json.verified) {
-        // Record failed attempt
         recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
         setIsProcessing(false);
-        console.error('Server verification failed:', json);
-        alert('Payment verification failed. Please contact support.');
+        const errorMsg = json?.error || 'Unknown error';
+        console.error('Payment verification failed:', errorMsg);
+        
+        // More helpful error message for users
+        let userMsg = 'Payment verification failed. Please contact support.';
+        if (errorMsg.includes('RAZORPAY_SECRET') || errorMsg.includes('not configured')) {
+          userMsg = 'Server configuration error: RAZORPAY_SECRET not set. Contact the team to set it in Netlify Site Settings > Build & Deploy > Environment.';
+        } else if (errorMsg.includes('Signature')) {
+          userMsg = 'Payment signature verification failed. This may be a security issue - do not retry.';
+        }
+        
+        alert(userMsg);
         return;
       }
 
