@@ -23,12 +23,7 @@ export const OYSTER_MUSHROOM_IMAGES = [
 
 // Button Mushroom Images Gallery
 export const BUTTON_MUSHROOM_IMAGES = [
-  'https://drive.google.com/file/d/1Qk6TX-GL-56QzDOE29zkn39XMTlYmshS/view?usp=drive_link',
-  'https://drive.google.com/file/d/1q5zRspvNLXuSZ4otZyOG301Mm1Hk2jY4/view?usp=drive_link',
-  'https://drive.google.com/file/d/1I36VLjiNs4iroDE4egKYcjT88M3U4RaJ/view?usp=drive_link',
-  'https://drive.google.com/file/d/1ayya5B8LY5ssqMlUJcN4CvHBmaiemSIq/view?usp=drive_link',
-  'https://drive.google.com/file/d/1BgiDZsKm0g4Zbllxy5Uqe1pjhnroENIY/view?usp=drive_link',
-  'https://drive.google.com/file/d/1-oQ2C9UOphk9YcdcpCiw7VaboWvN0k4c/view?usp=drive_link',
+  'https://images.pexels.com/photos/16732697/pexels-photo-16732697.jpeg',
 ];
 
 // Milky Mushroom Images Gallery
