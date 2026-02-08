@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Lock, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types';
 import { EASE_ORGANIC } from '../constants';
+import { storeVerifiedPayment, validatePaymentResponse, recordPaymentAttempt, getRazorpayKey } from '../utils/paymentVerification';
 
 interface CheckoutPageProps {
   cart: CartItem[];
@@ -41,29 +42,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
     setIsProcessing(true);
 
-    // Get Razorpay key from environment variables
-    const getRazorpayKey = (): string => {
-      // Try Vite's import.meta.env
-      const viteKey = (import.meta.env as any).VITE_RAZORPAY_KEY;
-      if (viteKey && viteKey !== '') {
-        return viteKey;
-      }
-      
-      // Try Netlify's window.__NETLIFY_ENV__
-      const netlifyEnv = (window as any).__NETLIFY_ENV__;
-      if (netlifyEnv && netlifyEnv.VITE_RAZORPAY_KEY && netlifyEnv.VITE_RAZORPAY_KEY !== '') {
-        return netlifyEnv.VITE_RAZORPAY_KEY;
-      }
-      
-      // Try process.env
-      const processKey = (process.env as any).VITE_RAZORPAY_KEY;
-      if (processKey && processKey !== '') {
-        return processKey;
-      }
-      
-      // Default test key
-      return 'rzp_test_SDbLXflWneqvCJ';
-    };
+    // Razorpay key will be read from runtime/build env by getRazorpayKey() util
 
     // Initialize Razorpay Payment
     const options = {
@@ -81,7 +60,7 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
         color: '#5D7C5C', // Moss green color
       },
       handler: function (response: any) {
-        // Payment completed - verify with backend
+        // Payment completed - verify with backend serverless function
         verifyPayment(response);
       },
       modal: {
@@ -98,30 +77,54 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
 
   const verifyPayment = async (paymentResponse: any) => {
     try {
-      // In a production environment, you would send this to your backend for verification
-      // For now, we verify locally using the payment ID and secret
+      // Send payment response to serverless function for HMAC verification
+      const resp = await fetch('/.netlify/functions/verifyPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentResponse)
+      });
+
+      const json = await resp.json();
+      if (!resp.ok || !json.verified) {
+        // Record failed attempt
+        recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
+        setIsProcessing(false);
+        console.error('Server verification failed:', json);
+        alert('Payment verification failed. Please contact support.');
+        return;
+      }
+
       const paymentId = paymentResponse.razorpay_payment_id;
       const orderId = paymentResponse.razorpay_order_id;
       const signature = paymentResponse.razorpay_signature;
 
-      // Store verified payment data
-      const verifiedPaymentData = {
-        orderId: paymentId,
+      // Store verified payment data (frontend record only)
+      const verifiedPayment = storeVerifiedPayment({
+        razorpayPaymentId: paymentId,
         razorpayOrderId: orderId,
         razorpaySignature: signature,
         amount: totalAmount,
-        customer: formData,
-        verifiedAt: new Date().toISOString(),
-        verified: true // Mark as verified
-      };
+        currency: 'INR',
+        customerInfo: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
+        },
+        orderDetails: {
+          items: cart.map(item => `${item.name} x${item.quantity}`),
+          totalItems: cart.length,
+          totalAmount: totalAmount
+        }
+      });
 
-      localStorage.setItem('verifiedPayment', JSON.stringify(verifiedPaymentData));
-      localStorage.setItem('paymentData', JSON.stringify(verifiedPaymentData));
+      // Record successful attempt
+      recordPaymentAttempt(paymentId, true);
 
       setIsProcessing(false);
       onPaymentSuccess();
     } catch (error) {
       console.error('Payment verification failed:', error);
+      recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
       setIsProcessing(false);
       alert('Payment verification failed. Please contact support.');
     }
