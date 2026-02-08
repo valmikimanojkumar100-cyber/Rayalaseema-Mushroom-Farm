@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Lock, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types';
 import { EASE_ORGANIC } from '../constants';
+import { storeVerifiedPayment, validatePaymentResponse, recordPaymentAttempt, getRazorpayKey } from '../utils/paymentVerification';
 
 interface CheckoutPageProps {
   cart: CartItem[];
@@ -26,13 +27,163 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     city: '',
     zip: ''
   });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showHostedButton, setShowHostedButton] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePaymentClick = async () => {
+    // Validate form before payment
+    if (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.city || !formData.zip) {
+      alert('Please fill in all shipping details');
+      return;
+    }
+
+    // Instead of opening the inline modal, show the hosted payment button
+    // which will render the provided Razorpay hosted payment form/script.
+    // Save order info to localStorage so payment page (hosted button) context can read it if needed.
+    const orderPreview = {
+      items: cart.map(i => ({ id: i.id, name: i.name, qty: i.quantity, price: i.price })),
+      total: totalAmount,
+      customer: formData,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      localStorage.setItem('razorpay_order_preview', JSON.stringify(orderPreview));
+    } catch (e) {
+      console.warn('Could not save order preview to localStorage', e);
+    }
+
+    setIsProcessing(false);
+    setShowHostedButton(true);
+  };
+
+  const verifyPayment = async (paymentResponse: any) => {
+    try {
+      // Send payment response to serverless function for HMAC verification
+      const resp = await fetch('/.netlify/functions/verifyPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paymentResponse)
+      });
+
+      const json = await resp.json();
+      if (!resp.ok || !json.verified) {
+        // Record failed attempt
+        recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
+        setIsProcessing(false);
+        console.error('Server verification failed:', json);
+        alert('Payment verification failed. Please contact support.');
+        return;
+      }
+
+      const paymentId = paymentResponse.razorpay_payment_id;
+      const orderId = paymentResponse.razorpay_order_id;
+      const signature = paymentResponse.razorpay_signature;
+
+      // Store verified payment data (frontend record only)
+      const verifiedPayment = storeVerifiedPayment({
+        razorpayPaymentId: paymentId,
+        razorpayOrderId: orderId,
+        razorpaySignature: signature,
+        amount: totalAmount,
+        currency: 'INR',
+        customerInfo: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone
+        },
+        orderDetails: {
+          items: cart.map(item => `${item.name} x${item.quantity}`),
+          totalItems: cart.length,
+          totalAmount: totalAmount
+        }
+      });
+
+      // Record successful attempt
+      recordPaymentAttempt(paymentId, true);
+
+      setIsProcessing(false);
+      onPaymentSuccess();
+    } catch (error) {
+      console.error('Payment verification failed:', error);
+      recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
+      setIsProcessing(false);
+      alert('Payment verification failed. Please contact support.');
+    }
+  };
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
+  // Inject hosted payment button script when requested
+  useEffect(() => {
+    if (!showHostedButton) return;
+
+    const container = document.getElementById('razorpay-hosted-form');
+    if (!container) return;
+
+    // Clear previous content
+    container.innerHTML = '';
+
+    const form = document.createElement('form');
+    form.setAttribute('method', 'POST');
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+    script.setAttribute('data-payment_button_id', 'pl_SDJ8x6qFOQ6GGP');
+    script.async = true;
+
+    form.appendChild(script);
+    container.appendChild(form);
+
+    return () => {
+      if (container.contains(form)) container.removeChild(form);
+    };
+  }, [showHostedButton]);
+
   return (
     <div className="min-h-screen relative pb-24">
+      {showHostedButton && (
+        <div className="fixed inset-0 z-40 bg-white/95 flex items-start justify-center p-8 overflow-auto">
+          <div className="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-lg">
+            <h2 className="text-2xl font-serif text-earth-900 mb-4">Complete Payment</h2>
+            <p className="text-earth-600 mb-4">Please review your order and click the payment button below to complete the transaction. After successful payment you'll be redirected to the confirmation page.</p>
+
+            <div className="bg-earth-50 rounded p-4 mb-4">
+              <p className="font-medium">Order summary</p>
+              <div className="mt-2 text-sm text-earth-600">
+                {cart.map(i => (
+                  <div key={i.id} className="flex justify-between">
+                    <span>{i.name} x{i.quantity}</span>
+                    <span>₹{i.price * i.quantity}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-semibold mt-2"> <span>Total</span> <span>₹{totalAmount}</span></div>
+              </div>
+            </div>
+
+            <div id="razorpay-hosted-form" className="mb-6" />
+
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowHostedButton(false)} className="px-4 py-2 rounded bg-earth-100">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Background Image Layer */}
       <div className="fixed inset-0 z-0">
         <div 
@@ -192,20 +343,29 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 </div>
               </div>
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full mt-8"
+              <motion.button
+                whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+                whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+                onClick={handlePaymentClick}
+                disabled={isProcessing}
+                className={`w-full mt-8 bg-gradient-to-r from-moss-600 to-moss-700 text-white font-semibold py-4 rounded-xl hover:from-moss-700 hover:to-moss-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                {/* Razorpay Hosted Payment Button */}
-                <form>
-                  <script 
-                    src="https://checkout.razorpay.com/v1/payment-button.js" 
-                    data-payment_button_id="pl_SDJ8x6qFOQ6GGP" 
-                    async
-                  />
-                </form>
-              </motion.div>
+                {isProcessing ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Processing Payment...
+                  </>
+                ) : (
+                  <>
+                    <Lock size={18} />
+                    Pay ₹{totalAmount} with Razorpay
+                  </>
+                )}
+              </motion.button>
               <div className="flex items-center justify-center gap-2 mt-4 text-xs text-earth-400">
                 <Lock size={12} />
                 <span>Secured by Razorpay</span>
