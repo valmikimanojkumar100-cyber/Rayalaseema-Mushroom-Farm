@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rayalaseema Mushroom Farm | Organic Mushroom Farming</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Satisfy&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+              display: ['Satisfy', 'cursive'],
+            },
+            colors: {
+              earth: {
+                50: '#f9f8f6',
+                100: '#f0ede6',
+                200: '#e0dacf',
+                300: '#cabcac',
+                400: '#a89482',
+                500: '#8f7a68',
+                600: '#756152',
+                700: '#5e4d41',
+                800: '#4d4037',
+                900: '#403630',
+              },
+              moss: {
+                50: '#f2fcf5',
+                100: '#e1f7e7',
+                200: '#c3ebd0',
+                300: '#94d9ae',
+                400: '#5cbf86',
+                500: '#38a36b',
+                600: '#288255',
+                700: '#246846',
+                800: '#21533b',
+                900: '#1c4432',
+              }
+            },
+            backgroundImage: {
+              'grain': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Smooth scrolling for anchor links */
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Hide scrollbar for clean look in some elements */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      /* When success page is shown after Razorpay redirect: hide all Razorpay UI and any iframes */
+      body.payment-success-view iframe,
+      body.payment-success-view [id*="razorpay"],
+      body.payment-success-view [class*="razorpay"],
+      body.payment-success-view [class*="rzp-"],
+      body.payment-success-view [id^="rzp"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        left: -9999px !important;
+        width: 0 !important;
+        height: 0 !important;
+        z-index: -1 !important;
+      }
+      /* Hide any non-root direct children of body that Razorpay may inject (e.g. modal wrapper) */
+      body.payment-success-view > *:not(#root) {
+        display: none !important;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "framer-motion": "https://esm.sh/framer-motion@^12.33.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-earth-50 text-earth-900 overflow-x-hidden selection:bg-moss-200 selection:text-moss-900">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
