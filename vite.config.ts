@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
       build: {
         outDir: 'dist',
         sourcemap: false,
-        minify: 'terser',
+        minify: 'esbuild',
         target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13'],
         rollupOptions: {
           output: {
