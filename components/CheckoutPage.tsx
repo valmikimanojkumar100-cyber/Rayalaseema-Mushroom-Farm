@@ -1,10 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Lock, ShoppingBag } from 'lucide-react';
 import { CartItem } from '../types';
 import { EASE_ORGANIC } from '../constants';
-import { storeVerifiedPayment, validatePaymentResponse, recordPaymentAttempt, getRazorpayKey } from '../utils/paymentVerification';
 
 interface CheckoutPageProps {
   cart: CartItem[];
@@ -27,133 +26,10 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
     city: '',
     zip: ''
   });
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const handlePaymentClick = async () => {
-    // Validate form before payment
-    if (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.city || !formData.zip) {
-      alert('Please fill in all shipping details');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    // Razorpay key will be read from runtime/build env by getRazorpayKey() util
-
-    // Initialize Razorpay Payment
-    const options = {
-      key: getRazorpayKey(),
-      amount: totalAmount * 100, // Amount in paise
-      currency: 'INR',
-      name: 'Rayalaseema Mushroom Farm',
-      description: 'Premium Mushroom Products',
-      prefill: {
-        name: formData.name,
-        email: formData.email,
-        contact: formData.phone,
-      },
-      theme: {
-        color: '#5D7C5C', // Moss green color
-      },
-      handler: function (response: any) {
-        // Payment completed - verify with backend serverless function
-        verifyPayment(response);
-      },
-      modal: {
-        ondismiss: function() {
-          setIsProcessing(false);
-          alert('Payment cancelled. Please try again.');
-        }
-      }
-    };
-
-    const razorpay = new (window as any).Razorpay(options);
-    razorpay.open();
-  };
-
-  const verifyPayment = async (paymentResponse: any) => {
-    try {
-      // Send payment response to serverless function for HMAC verification
-      const resp = await fetch('/.netlify/functions/verifyPayment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentResponse)
-      });
-
-      const json = await resp.json();
-      console.log('Verification response:', json);
-      
-      if (!resp.ok || !json.verified) {
-        recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
-        setIsProcessing(false);
-        const errorMsg = json?.error || 'Unknown error';
-        console.error('Payment verification failed:', errorMsg);
-        
-        // More helpful error message for users
-        let userMsg = 'Payment verification failed. Please contact support.';
-        if (errorMsg.includes('RAZORPAY_SECRET') || errorMsg.includes('not configured')) {
-          userMsg = 'Server configuration error: RAZORPAY_SECRET not set. Contact the team to set it in Netlify Site Settings > Build & Deploy > Environment.';
-        } else if (errorMsg.includes('Signature')) {
-          userMsg = 'Payment signature verification failed. This may be a security issue - do not retry.';
-        }
-        
-        alert(userMsg);
-        return;
-      }
-
-      const paymentId = paymentResponse.razorpay_payment_id;
-      const orderId = paymentResponse.razorpay_order_id;
-      const signature = paymentResponse.razorpay_signature;
-
-      // Store verified payment data (frontend record only)
-      const verifiedPayment = storeVerifiedPayment({
-        razorpayPaymentId: paymentId,
-        razorpayOrderId: orderId,
-        razorpaySignature: signature,
-        amount: totalAmount,
-        currency: 'INR',
-        customerInfo: {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone
-        },
-        orderDetails: {
-          items: cart.map(item => `${item.name} x${item.quantity}`),
-          totalItems: cart.length,
-          totalAmount: totalAmount
-        }
-      });
-
-      // Record successful attempt
-      recordPaymentAttempt(paymentId, true);
-
-      setIsProcessing(false);
-      onPaymentSuccess();
-    } catch (error) {
-      console.error('Payment verification failed:', error);
-      recordPaymentAttempt(paymentResponse?.razorpay_payment_id || '', false);
-      setIsProcessing(false);
-      alert('Payment verification failed. Please contact support.');
-    }
-  };
-
-  // Load Razorpay script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen relative pb-24">
@@ -316,15 +192,20 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 </div>
               </div>
 
-              <div className="mt-8">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full mt-8"
+              >
+                {/* Razorpay Hosted Payment Button */}
                 <form>
                   <script 
                     src="https://checkout.razorpay.com/v1/payment-button.js" 
                     data-payment_button_id="pl_SDJ8x6qFOQ6GGP" 
-                    async>
-                  </script>
+                    async
+                  />
                 </form>
-              </div>
+              </motion.div>
               <div className="flex items-center justify-center gap-2 mt-4 text-xs text-earth-400">
                 <Lock size={12} />
                 <span>Secured by Razorpay</span>
