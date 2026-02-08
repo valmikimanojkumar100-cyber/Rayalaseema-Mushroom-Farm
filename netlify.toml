@@ -6,11 +6,12 @@
   publish = "dist"
   functions = "netlify/functions"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
+  environment = { NPM_FLAGS = "--include=dev", NODE_ENV = "production" }
 
 # Production context
 [context.production]
   command = "npm ci && npm run build"
-  environment = { NODE_ENV = "production" }
+  environment = { NODE_ENV = "production", NPM_FLAGS = "--include=dev" }
 
 # Deploy preview context (for pull requests)
 [context.deploy-preview]
