@@ -41,23 +41,64 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
       return;
     }
 
-    // Instead of opening the inline modal, show the hosted payment button
-    // which will render the provided Razorpay hosted payment form/script.
-    // Save order info to localStorage so payment page (hosted button) context can read it if needed.
-    const orderPreview = {
-      items: cart.map(i => ({ id: i.id, name: i.name, qty: i.quantity, price: i.price })),
-      total: totalAmount,
-      customer: formData,
-      createdAt: new Date().toISOString()
-    };
-    try {
-      localStorage.setItem('razorpay_order_preview', JSON.stringify(orderPreview));
-    } catch (e) {
-      console.warn('Could not save order preview to localStorage', e);
-    }
+    setIsProcessing(true);
 
-    setIsProcessing(false);
-    setShowHostedButton(true);
+    // Build items array for notes and order creation
+    const items = cart.map(i => ({ id: i.id, name: i.name, qty: i.quantity, price: i.price }));
+
+    try {
+      // Create order on server (Netlify function) to get Razorpay order_id
+      const resp = await fetch('/.netlify/functions/createOrder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: totalAmount, currency: 'INR', items, customer: formData })
+      });
+
+      const json = await resp.json();
+      if (!resp.ok) {
+        console.error('createOrder failed', json);
+        alert('Failed to initialize payment. Please try again later.');
+        setIsProcessing(false);
+        return;
+      }
+
+      const orderId = json.orderId;
+
+      // Initialize Razorpay Payment inline with order_id so checkout shows correct amount
+      const options = {
+        key: getRazorpayKey(),
+        amount: json.amount, // in paise
+        currency: json.currency || 'INR',
+        name: 'Rayalaseema Mushroom Farm',
+        description: `Order - ${items.length} items`,
+        order_id: orderId,
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        notes: {
+          items: items.map(it => `${it.name} x${it.qty}`).join(', '),
+          customer: `${formData.name} <${formData.email}>`,
+        },
+        handler: function(response: any) {
+          verifyPayment(response);
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            alert('Payment cancelled. Please try again.');
+          }
+        }
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error('Payment init error', err);
+      alert('Unable to start payment. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   const verifyPayment = async (paymentResponse: any) => {
