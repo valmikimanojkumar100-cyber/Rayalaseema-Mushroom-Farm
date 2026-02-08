@@ -316,29 +316,15 @@ export const CheckoutPage: React.FC<CheckoutPageProps> = ({
                 </div>
               </div>
 
-              <motion.button
-                whileHover={{ scale: isProcessing ? 1 : 1.02 }}
-                whileTap={{ scale: isProcessing ? 1 : 0.98 }}
-                onClick={handlePaymentClick}
-                disabled={isProcessing}
-                className={`w-full mt-8 bg-gradient-to-r from-moss-600 to-moss-700 text-white font-semibold py-4 rounded-xl hover:from-moss-700 hover:to-moss-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
-              >
-                {isProcessing ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-                    />
-                    Processing Payment...
-                  </>
-                ) : (
-                  <>
-                    <Lock size={18} />
-                    Pay ₹{totalAmount} with Razorpay
-                  </>
-                )}
-              </motion.button>
+              <div className="mt-8">
+                <form>
+                  <script 
+                    src="https://checkout.razorpay.com/v1/payment-button.js" 
+                    data-payment_button_id="pl_SDJ8x6qFOQ6GGP" 
+                    async>
+                  </script>
+                </form>
+              </div>
               <div className="flex items-center justify-center gap-2 mt-4 text-xs text-earth-400">
                 <Lock size={12} />
                 <span>Secured by Razorpay</span>
