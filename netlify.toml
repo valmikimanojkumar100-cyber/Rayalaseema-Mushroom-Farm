@@ -6,33 +6,45 @@
   publish = "dist"
   functions = "netlify/functions"
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- ."
-  environment = { NPM_FLAGS = "--include=dev", NODE_ENV = "production" }
+
+[build.environment]
+  NODE_VERSION = "20.19.0"
+  NODE_ENV = "production"
+  CI = "true"
+  GENERATE_SOURCEMAP = "false"
+  NPM_FLAGS = "--include=dev"
 
 # Production context
 [context.production]
   command = "npm ci && npm run build"
-  environment = { NODE_ENV = "production", NPM_FLAGS = "--include=dev" }
+
+[context.production.environment]
+  NODE_ENV = "production"
+  NODE_VERSION = "20.19.0"
+  NPM_FLAGS = "--include=dev"
 
 # Deploy preview context (for pull requests)
 [context.deploy-preview]
   command = "npm ci && npm run build"
-  environment = { NODE_ENV = "development" }
+
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+  NODE_VERSION = "20.19.0"
+  NPM_FLAGS = "--include=dev"
 
 # Branch Deploy context
 [context.branch-deploy]
   command = "npm ci && npm run build"
-  environment = { NODE_ENV = "development" }
+
+[context.branch-deploy.environment]
+  NODE_ENV = "development"
+  NODE_VERSION = "20.19.0"
+  NPM_FLAGS = "--include=dev"
 
 # SPA Routing - All routes go to index.html for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
-
-# API redirects (if needed in future)
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
   status = 200
 
 # Security headers
@@ -50,45 +62,29 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-    ETag = "strong"
 
 # Caching for HTML (no cache to get latest)
 [[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-    ETag = "strong"
 
-# Caching for service workers and manifests
+# Caching for manifest files
 [[headers]]
   for = "/*.json"
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
-# Build environment variables - CRITICAL FOR NETLIFY
-[build.environment]
-  NODE_VERSION = "18.20.0"
-  NPM_VERSION = "10.2.0"
-  NODE_ENV = "production"
-  CI = "true"
-  GENERATE_SOURCEMAP = "false"
-
-# Environment variables configuration (SET THESE IN NETLIFY DASHBOARD)
-# Go to: Site Settings → Build & Deploy → Environment
-# Add the following variables:
-# VITE_GOOGLE_CLIENT_ID = your_google_oauth_client_id
-# VITE_RAZORPAY_KEY = rzp_test_SDbLXflWneqvCJ (or your production key)
-# VITE_API_URL = https://api.example.com (if needed)
-
 # Functions configuration
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  
-  # Timeout for serverless functions
-  [functions.timeout]
-    default = 25
+  timeout = 25
 
-# Analytics and monitoring
-[analytics]
-  enabled = true
+# Environment variables configuration
+# IMPORTANT: Set these in Netlify Dashboard
+# Go to: Site Settings → Build & Deploy → Environment
+# Add the following variables:
+# - VITE_GOOGLE_CLIENT_ID = your_google_oauth_client_id
+# - VITE_RAZORPAY_KEY = rzp_test_SDbLXflWneqvCJ (or production key)
+# - VITE_API_URL = https://api.example.com (optional)
