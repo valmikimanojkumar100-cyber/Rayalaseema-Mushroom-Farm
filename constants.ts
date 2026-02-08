@@ -10,25 +10,22 @@ const newLocal = 'https://images.unsplash.com/photo-1599599810694-d5ff3a6a4ee0?a
 // Oyster Mushroom Images Gallery
 export const OYSTER_MUSHROOM_IMAGES = [
   newLocal,
-  'https://images.unsplash.com/photo-1591511792635-01ade8d83d61?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1585518419759-7fe957de2da1?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810932-35c1135ff319?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810119-eb3bccbbf531?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1565229219921-6cf16a02372f?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1585518419759-7fe957de2da1?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1615214044535-6967f139031c?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1574487326512-b71866ff783f?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810735-9f5e7f8b0b0f?auto=format&fit=crop&q=80&w=600&h=800',
+  'https://images.pexels.com/photos/2478405/pexels-photo-2478405.jpeg',
+  'https://images.pexels.com/photos/2478418/pexels-photo-2478418.jpeg',
+  'https://images.pexels.com/photos/16732702/pexels-photo-16732702.jpeg',
 ];
 
 // Button Mushroom Images Gallery
 export const BUTTON_MUSHROOM_IMAGES = [
-  'https://images.pexels.com/photos/16732697/pexels-photo-16732697.jpeg',
+  'https://images.pexels.com/photos/10307853/pexels-photo-10307853.jpeg',
+  'https://images.pexels.com/photos/10307856/pexels-photo-10307856.jpeg',
 ];
 
 // Milky Mushroom Images Gallery
 export const MILKY_MUSHROOM_IMAGES = [
-  'https://drive.google.com/uc?export=view&id=1I13rwAWQ4ivo_WAfpBL7VMww7pgVtgCG',
+  'https://www.dreamstime.com/milky-mushroom-growth-soil-farm-image146889535',
+  'https://images.pexels.com/photos/6157043/pexels-photo-6157043.jpeg',
+  'https://images.pexels.com/photos/5987623/pexels-photo-5987623.jpeg',
 ];
 
 
