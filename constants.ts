@@ -23,30 +23,17 @@ export const OYSTER_MUSHROOM_IMAGES = [
 
 // Button Mushroom Images Gallery
 export const BUTTON_MUSHROOM_IMAGES = [
-  'https://images.unsplash.com/photo-1585518419759-7fe957de2da1?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810694-d5ff3a6a4ee0?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1584298425111-dfda5a8ba96a?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1511689098b4-f0208e8db7e0?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810932-35c1135ff319?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1520763185298-1b434c919eba?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1565229219921-6cf16a02372f?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1624206566197-02c45a029753?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1595304383796-03c0b05b3b0d?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80&w=600&h=800',
+  'https://drive.google.com/file/d/1Qk6TX-GL-56QzDOE29zkn39XMTlYmshS/view?usp=drive_link',
+  'https://drive.google.com/file/d/1q5zRspvNLXuSZ4otZyOG301Mm1Hk2jY4/view?usp=drive_link',
+  'https://drive.google.com/file/d/1I36VLjiNs4iroDE4egKYcjT88M3U4RaJ/view?usp=drive_link',
+  'https://drive.google.com/file/d/1ayya5B8LY5ssqMlUJcN4CvHBmaiemSIq/view?usp=drive_link',
+  'https://drive.google.com/file/d/1BgiDZsKm0g4Zbllxy5Uqe1pjhnroENIY/view?usp=drive_link',
+  'https://drive.google.com/file/d/1-oQ2C9UOphk9YcdcpCiw7VaboWvN0k4c/view?usp=drive_link',
 ];
 
 // Milky Mushroom Images Gallery
 export const MILKY_MUSHROOM_IMAGES = [
-  'https://images.unsplash.com/photo-1584298425111-dfda5a8ba96a?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1585518419759-7fe957de2da1?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810119-eb3bccbbf531?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1591511792635-01ade8d83d61?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1565229219921-6cf16a02372f?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1520763185298-1b434c919eba?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1574487326512-b71866ff783f?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1624206566197-02c45a029753?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1599599810694-d5ff3a6a4ee0?auto=format&fit=crop&q=80&w=600&h=800',
-  'https://images.unsplash.com/photo-1511689098b4-f0208e8db7e0?auto=format&fit=crop&q=80&w=600&h=800',
+  'https://drive.google.com/uc?export=view&id=1I13rwAWQ4ivo_WAfpBL7VMww7pgVtgCG',
 ];
 
 
